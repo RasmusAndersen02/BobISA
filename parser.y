@@ -10,24 +10,27 @@
   char* label;
 }
 
-%token <bit16> ARITH_UNI
+%token <bit16> EXCHANGE BRANCH_REGOFF BRANCH_OFF BRANCH_REG ARITH_BIN ARITH_UNI
+%token <bit16> REGISTER INTEGER
+%token <label> IDENTIFIER
 
 %token COMMA EOL
 
-%union {
-  
-}
-
+// AT&T type thing
 %%
-operation: instruction  
+instruction: 
+  |ARITH_UNI REGISTER {} 
+  |ARITH_BIN REGISTER, REGISTER {} 
+  |BRANCH_REGOFF REGISTER, REGISTER {} 
+  |BRANCH_OFF REGISTER {} 
+  |BRANCH_REG REGISTER {} 
+  |EXCHANGE REGISTER, REGISTER {}
 
 
 
 %%
 int main(int argc, char* argv[]){
-
   yyparse();
 }
-void(char *s){
-  fprintf(stderr, "whoops %s\n", s);
-}
+uint16_t 
+
