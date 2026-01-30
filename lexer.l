@@ -1,5 +1,5 @@
 %{
-
+#include "encoding.h"
 %}
 
 %%
@@ -11,9 +11,10 @@
 "SUB1" {yylval.bit16 = OP_SUB1; return ARITH_UNI;}
 "NEG" {yylval.bit16 = OP_NEG; return ARITH_UNI;}
 "XOR" {yylval.bit16 = OP_XOR; return ARITH_BIN;}
-"XORI" {yylval.bit16 = OP_XORI; return ARITH_UNI;}
-"MUL2" {yylval.bit16 = OP_MUL2; return ARITH_UNI;}
-"DIV2" {yylval.bit16 = OP_DIV2; return ARITH_UNI;}
+// Diff for some reason
+"XORI" {yylval.bit16 = OP_XORI; return ARITH_XORI;}
+"MUL2" {yylval.bit16 = OP_MUL2; return ARITH_NA;}
+"DIV2" {yylval.bit16 = OP_DIV2; return ARITH_NA;}
 
 // Branch/Memory Instruction
 "BGEZ" {yylval.bit16 = OP_BGEZ; return BRANCH_REGOFF;}
