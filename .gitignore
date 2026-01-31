@@ -1,4 +1,5 @@
 bob-ass
 parser.tab.c
 parser.tab.h
+lex.yy.c
 
