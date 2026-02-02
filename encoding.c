@@ -29,7 +29,7 @@ uint16_t lookup_sym(char *name) {
   return 1;
 }
 uint16_t arith_uni(opcode op, uint16_t regd) {
-  uint16_t encoding = 0x0b << 12;
+  uint16_t encoding = 0x0c << 12;
   encoding |= regd << 8;
   switch (op) {
   case OP_ADD1:
@@ -47,7 +47,7 @@ uint16_t arith_uni(opcode op, uint16_t regd) {
   return (encoding);
 }
 uint16_t arith_bin(opcode op, uint16_t regd, uint16_t regs) {
-  uint16_t encoding = 0x0b << 12;
+  uint16_t encoding = 0x0c << 12;
   encoding |= regd << 8;
   encoding |= regs << 4;
   switch (op) {
