@@ -1,5 +1,5 @@
-assembler
-parser.tab.c
-parser.tab.h
-lex.yy.c
+assembler/assembler
+assembler/parser.tab.c
+assembler/parser.tab.h
+assembler/lex.yy.c
 
