@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 
-all: assembler
+# all: assembler
 
 bob-ass: parser.tab.c lex.yy.c encoding.c
 	$(CC) $(CFLAGS) -o assembler parser.tab.c lex.yy.c encoding.c

@@ -1,12 +1,12 @@
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "emulator.h"
-
-int main(int argc, char *argv[]) { return EXIT_SUCCESS; }
 
 ProgramState *new_state(ProgramState *prev_state, instruction input) {
   op_code opcode = mask_and_shift(OP, input);
@@ -14,42 +14,118 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
   uint16_t regs = mask_and_shift(REGs, input);
   arith_code arith = mask_and_shift(ARITH, input);
   uint16_t offimm = mask_and_shift(OFFIMM, input);
-  ProgramState curr_state = *prev_state;
+  ProgramState *curr_state = malloc(sizeof(ProgramState));
+
+  curr_state->program_counter = prev_state->program_counter;
+  curr_state->br_register = prev_state->br_register;
+  curr_state->direction_bit = prev_state->direction_bit;
+  curr_state->memory = malloc(sizeof(uint16_t) * (1 << 16));
+  // stupid ineffecient
+  memcpy(curr_state->memory, prev_state->memory, sizeof(uint16_t) * (1 << 16));
+
+  curr_state->standard_registers = malloc(sizeof(uint16_t) * 16);
+  memcpy(curr_state->standard_registers, prev_state->standard_registers,
+         sizeof(uint16_t) * 16);
+
   switch (opcode) {
   case ARITH_OP:
-    arith_wrapper(&curr_state, regd, regs, arith);
+    arith_wrapper(curr_state, regd, regs, arith);
+    break;
   case ARITH_XORI:
-    arith_xori(&curr_state, regd, offimm);
+    arith_xori(curr_state, regd, offimm);
+    break;
   case ARITH_MUL2:
-    arith_mul(&curr_state, regd);
+    arith_mul(curr_state, regd);
+    break;
   case ARITH_DIV2:
-    arith_div(&curr_state, regd);
+    arith_div(curr_state, regd);
+    break;
   case MEM_EXCH:
-    mem_exchange(&curr_state, regd, regs);
+    mem_exchange(curr_state, regd, regs);
+    break;
   case BGEZ:
-    branch_bgez(&curr_state, regd, offimm);
+    branch_bgez(curr_state, regd, offimm);
+    break;
   case BLZ:
-    branch_blz(&curr_state, regd, offimm);
+    branch_blz(curr_state, regd, offimm);
+    break;
   case BEVN:
-    branch_bevn(&curr_state, regd, offimm);
+    branch_bevn(curr_state, regd, offimm);
+    break;
   case BODD:
-    branch_bodd(&curr_state, regd, offimm);
+    branch_bodd(curr_state, regd, offimm);
+    break;
   case BRA:
-    branch_bra(&curr_state, offimm);
+    branch_bra(curr_state, offimm);
+    break;
   case RSWB:
-    branch_rswb(&curr_state, regd);
+    branch_rswb(curr_state, regd);
+    break;
   case SWB:
-    branch_swb(&curr_state, regd);
+    branch_swb(curr_state, regd);
+    break;
+  }
+  if (curr_state->br_register != 0) {
+    curr_state->program_counter += curr_state->br_register;
+  } else {
+    curr_state->program_counter++;
   }
 
-  return NULL;
+  return curr_state;
 }
-ProgramState init_state() {
-  ProgramState init;
-  init.memory = malloc(sizeof(uint16_t) * 1 << 16);
-  init.program_counter = 0;
-  init.br_register = 0;
-  init.standard_registers = malloc(sizeof(uint16_t) * 16);
-  init.direction_bit = false;
+ProgramState *init_state() {
+  ProgramState *init = malloc(sizeof(ProgramState));
+  init->memory = malloc(sizeof(uint16_t) * (1 << 16));
+  init->program_counter = 0;
+  init->br_register = 0;
+  init->standard_registers = calloc(16, sizeof(uint16_t));
+  init->direction_bit = false;
   return init;
+}
+void print_states(ProgramState **state_array, size_t state_count) {
+  for (size_t i = 0; i <= state_count; i++) {
+    ProgramState *state = state_array[i];
+
+    fprintf(stdout, "____State %zu \n", i);
+    fprintf(stdout, "Program Counter: %u \n", state->program_counter);
+    fprintf(stdout, "Branch Register: %u \n", state->br_register);
+    fprintf(stdout, "Direction Bit: %u \n", state->direction_bit);
+    for (size_t j = 0; j < 16; j++) {
+      fprintf(stdout, "reg%zu: %d - ", j, state->standard_registers[j]);
+    }
+    fprintf(stdout, "\n");
+  }
+}
+
+ProgramState **runner(uint16_t *file_buf, uint16_t words_in_file,
+                      uint16_t *total_states) {
+  ProgramState **state_array = malloc(sizeof(ProgramState *) * 100);
+  state_array[*total_states] = init_state();
+  ProgramState *curr_state = state_array[0];
+  while (curr_state->program_counter < words_in_file) {
+    state_array[*total_states + 1] = new_state(
+        state_array[*total_states], file_buf[curr_state->program_counter]);
+    curr_state = state_array[++*total_states];
+  }
+  return state_array;
+}
+
+int main(int argc, char *argv[]) {
+
+  FILE *asm_file;
+  asm_file = fopen(argv[1], "rb");
+  if (ferror(asm_file) != 0) {
+    fprintf(stderr, "error in reading asm file \n");
+  }
+  fseek(asm_file, 0L, SEEK_END);
+  uint16_t instruction_count = ftell(asm_file) / 2;
+
+  uint16_t *file_buffer = malloc(sizeof(uint16_t) * instruction_count);
+  rewind(asm_file);
+  fread(file_buffer, sizeof(uint16_t), instruction_count, asm_file);
+  uint16_t total_states = 0;
+  ProgramState **exec = runner(file_buffer, instruction_count, &total_states);
+  print_states(exec, total_states);
+
+  return EXIT_SUCCESS;
 }

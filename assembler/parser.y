@@ -119,14 +119,14 @@ void yyerror(const char *s) {
 }
 
 int main(int argc, char **argv) {
-    if (argc < 3) {
-        fprintf(stderr, "Mooo, wrong args");
+    if (argc != 3) {
+        fprintf(stderr, "wrong args : [input.bob] [output.out]");
         return 1;
     }
 
     FILE *input_file = fopen(argv[1], "r");
     if (!input_file) {
-        fprintf(stderr, "Mooo, .bob file opening failed");
+        fprintf(stderr, ".bob file opening failed");
         return 1;
     }
     yyin = input_file;
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
     output_file = fopen(argv[2], "wb");
     if (!output_file) {
-        fprintf(stderr, "Mooo, bin file error");
+        fprintf(stderr, "bin file error");
         return 1;
     }
     pass = 2;

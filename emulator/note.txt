@@ -1,0 +1,24 @@
+
+  int16_t max = (int16_t)(1u << 14);
+  int16_t min = -(int16_t)(1u << 14);
+  
+  if (curr->standard_registers[regd] >= max) {
+    curr->standard_registers[regd] =
+        curr->standard_registers[regd] * 2 - (1 << 14) + 1;
+  } else if (curr->standard_registers[regd] < min) {
+    curr->standard_registers[regd] =
+        curr->standard_registers[regd] * 2 + (1 << 14) + 1;
+  } else {
+    curr->standard_registers[regd] *= 2;
+  }
+  
+   if (curr->standard_registers[regd] % 2 == 0) {
+     curr->standard_registers[regd] /= 2;
+   } else if (curr->standard_registers[regd] > 0) {
+     curr->standard_registers[regd] =
+         (curr->standard_registers[regd] - 1) / 2 + (1 << 14);
+   } else if (curr->standard_registers[regd] < 0) {
+     curr->standard_registers[regd] =
+         (curr->standard_registers[regd] - 1) / 2 - (1 << 14);
+   }
+

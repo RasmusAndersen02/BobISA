@@ -25,12 +25,16 @@ void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith) {
   switch (arith) {
   case ADD1:
     curr->standard_registers[regd] += 1;
+    break;
   case SUB1:
     curr->standard_registers[regd] -= 1;
+    break;
   case NEG:
     curr->standard_registers[regd] = -curr->standard_registers[regd];
+    break;
   default:
     fprintf(stderr, "didnt hit unary enum: %d", arith);
+    break;
   }
 }
 
@@ -40,12 +44,16 @@ void arith_bin(ProgramState *curr, uint16_t regd, uint16_t regs,
   switch (arith) {
   case ADD:
     curr->standard_registers[regd] += curr->standard_registers[regs];
+    break;
   case SUB:
     curr->standard_registers[regd] -= curr->standard_registers[regs];
+    break;
   case XOR:
     curr->standard_registers[regd] ^= curr->standard_registers[regs];
+    break;
   default:
     fprintf(stderr, "didnt hit binary enum: %d", arith);
+    break;
   }
 }
 
@@ -67,37 +75,50 @@ void arith_mul(ProgramState *curr, uint16_t regd) {
   uint16_t temp = (uint16_t)curr->standard_registers[regd];
   temp <<= 1;
   curr->standard_registers[regd] = (int16_t)temp;
-
-  // int16_t max = (int16_t)(1u << 14);
-  // int16_t min = -(int16_t)(1u << 14);
-  //
-  // if (curr->standard_registers[regd] >= max) {
-  //   curr->standard_registers[regd] =
-  //       curr->standard_registers[regd] * 2 - (1 << 14) + 1;
-  // } else if (curr->standard_registers[regd] < min) {
-  //   curr->standard_registers[regd] =
-  //       curr->standard_registers[regd] * 2 + (1 << 14) + 1;
-  // } else {
-  //   curr->standard_registers[regd] *= 2;
-  // }
 }
 void arith_div(ProgramState *curr, uint16_t regd) {
   uint16_t temp = (uint16_t)curr->standard_registers[regd];
   uint16_t odd_mask = temp & 1;
   temp = (temp >> 1) | (odd_mask << 15);
   curr->standard_registers[regd] = (int16_t)temp;
-
-  // if (curr->standard_registers[regd] % 2 == 0) {
-  //   curr->standard_registers[regd] /= 2;
-  // } else if (curr->standard_registers[regd] > 0) {
-  //   curr->standard_registers[regd] =
-  //       (curr->standard_registers[regd] - 1) / 2 + (1 << 14);
-  // } else if (curr->standard_registers[regd] < 0) {
-  //   curr->standard_registers[regd] =
-  //       (curr->standard_registers[regd] - 1) / 2 - (1 << 14);
-  // }
 }
-void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t regs) {}
-void branch_regoff(ProgramState *curr, uint16_t regd, uint16_t offset) {}
-void branch_off(ProgramState *curr, uint16_t offset) {}
-void branch_reg(ProgramState *curr, uint16_t regd) {}
+// kan kun tage to regs, tror man bliver nødt til double XOR
+void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t rega) {
+  curr->standard_registers[regd] ^= curr->standard_registers[rega];
+  curr->standard_registers[rega] ^= curr->standard_registers[regd];
+  curr->standard_registers[regd] ^= curr->standard_registers[rega];
+}
+void branch_bgez(ProgramState *curr, uint16_t regd, uint16_t offset) {
+  if (curr->standard_registers[regd] >= 0) {
+    curr->br_register += offset;
+  }
+}
+void branch_blz(ProgramState *curr, uint16_t regd, uint16_t offset) {
+  if (curr->standard_registers[regd] < 0) {
+    curr->br_register += offset;
+  }
+}
+void branch_bevn(ProgramState *curr, uint16_t regd, uint16_t offset) {
+  if (curr->standard_registers[regd] % 2 == 0) {
+    curr->br_register += offset;
+  }
+}
+void branch_bodd(ProgramState *curr, uint16_t regd, uint16_t offset) {
+  if (curr->standard_registers[regd] % 2 == 1) {
+    curr->br_register += offset;
+  }
+}
+void branch_bra(ProgramState *curr, uint16_t offset) {
+  curr->br_register += offset;
+}
+void branch_rswb(ProgramState *curr, uint16_t regd) {
+  curr->standard_registers[regd] ^= curr->br_register;
+  curr->br_register ^= curr->standard_registers[regd];
+  curr->standard_registers[regd] ^= curr->br_register;
+  curr->direction_bit = !curr->direction_bit;
+}
+void branch_swb(ProgramState *curr, uint16_t regd) {
+  curr->standard_registers[regd] ^= curr->br_register;
+  curr->br_register ^= curr->standard_registers[regd];
+  curr->standard_registers[regd] ^= curr->br_register;
+}
