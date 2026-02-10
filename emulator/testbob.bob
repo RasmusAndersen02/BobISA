@@ -3,5 +3,4 @@ ADD1 reg1
 BGEZ reg1, target
 SUB1 reg1
 _target_
-BRA target
-XOR reg1, reg2
+XOR reg2, reg1

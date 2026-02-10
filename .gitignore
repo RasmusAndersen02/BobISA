@@ -3,3 +3,7 @@ assembler/parser.tab.c
 assembler/parser.tab.h
 assembler/lex.yy.c
 
+*.o
+*.out
+emulator/emulator
+emulator/note.txt
