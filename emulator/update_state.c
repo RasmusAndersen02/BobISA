@@ -21,13 +21,15 @@ uint16_t mask_and_shift(mask m, instruction inst) {
   }
 }
 
-void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith) {
+void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith,
+               int8_t dir) {
+
   switch (arith) {
   case ADD1:
-    curr->standard_registers[regd] += 1;
+    curr->standard_registers[regd] += dir;
     break;
   case SUB1:
-    curr->standard_registers[regd] -= 1;
+    curr->standard_registers[regd] -= dir;
     break;
   case NEG:
     curr->standard_registers[regd] = -curr->standard_registers[regd];
@@ -39,14 +41,13 @@ void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith) {
 }
 
 void arith_bin(ProgramState *curr, uint16_t regd, uint16_t regs,
-               arith_code arith) {
-
+               arith_code arith, int8_t dir) {
   switch (arith) {
   case ADD:
-    curr->standard_registers[regd] += curr->standard_registers[regs];
+    curr->standard_registers[regd] += dir * curr->standard_registers[regs];
     break;
   case SUB:
-    curr->standard_registers[regd] -= curr->standard_registers[regs];
+    curr->standard_registers[regd] -= dir * curr->standard_registers[regs];
     break;
   case XOR:
     curr->standard_registers[regd] ^= curr->standard_registers[regs];
@@ -58,11 +59,11 @@ void arith_bin(ProgramState *curr, uint16_t regd, uint16_t regs,
 }
 
 void arith_wrapper(ProgramState *curr, uint16_t regd, uint16_t regs,
-                   arith_code arith) {
+                   arith_code arith, int8_t dir) {
   if (regs == 0) {
-    arith_uni(curr, regd, arith);
+    arith_uni(curr, regd, arith, dir);
   } else {
-    arith_bin(curr, regd, regs, arith);
+    arith_bin(curr, regd, regs, arith, dir);
   }
 }
 
@@ -70,17 +71,25 @@ void arith_xori(ProgramState *curr, uint16_t regd, uint16_t immediate) {
   curr->standard_registers[regd] ^= immediate;
 }
 // Kan bruge BGEZ / BLZ for bounds checking af regd.
-void arith_mul(ProgramState *curr, uint16_t regd) {
+void arith_mul(ProgramState *curr, uint16_t regd, int8_t dir) {
   // Shoutout ChatiGippity
   uint16_t temp = (uint16_t)curr->standard_registers[regd];
-  temp <<= 1;
-  curr->standard_registers[regd] = (int16_t)temp;
+  if (dir == -1) {
+    arith_div(curr, regd, -dir);
+  } else {
+    temp <<= 1;
+    curr->standard_registers[regd] = (int16_t)temp;
+  }
 }
-void arith_div(ProgramState *curr, uint16_t regd) {
-  uint16_t temp = (uint16_t)curr->standard_registers[regd];
-  uint16_t odd_mask = temp & 1;
-  temp = (temp >> 1) | (odd_mask << 15);
-  curr->standard_registers[regd] = (int16_t)temp;
+void arith_div(ProgramState *curr, uint16_t regd, int8_t dir) {
+  if (dir == -1) {
+    arith_mul(curr, regd, -dir);
+  } else {
+    uint16_t temp = (uint16_t)curr->standard_registers[regd];
+    uint16_t odd_mask = temp & 1;
+    temp = (temp >> 1) | (odd_mask << 15);
+    curr->standard_registers[regd] = (int16_t)temp;
+  }
 }
 // kan kun tage to regs, tror man bliver nødt til double XOR
 void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t rega) {
@@ -115,7 +124,7 @@ void branch_rswb(ProgramState *curr, uint16_t regd) {
   curr->standard_registers[regd] ^= curr->br_register;
   curr->br_register ^= curr->standard_registers[regd];
   curr->standard_registers[regd] ^= curr->br_register;
-  curr->direction_bit = !curr->direction_bit;
+  curr->direction_bit = -curr->direction_bit;
 }
 void branch_swb(ProgramState *curr, uint16_t regd) {
   curr->standard_registers[regd] ^= curr->br_register;

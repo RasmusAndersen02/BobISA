@@ -11,7 +11,7 @@ typedef struct ProgramState {
   int16_t *standard_registers;
   uint16_t br_register;
   uint16_t program_counter;
-  bool direction_bit;
+  int8_t direction_bit;
 } ProgramState;
 
 typedef enum {
@@ -45,13 +45,13 @@ typedef enum {
 } op_code;
 
 uint16_t mask_and_shift(mask m, instruction inst);
-void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith);
+void arith_uni(ProgramState *curr, uint16_t regd, arith_code arith, int8_t dir);
 void arith_bin(ProgramState *curr, uint16_t regd, uint16_t regs,
-               arith_code arith);
+               arith_code arith, int8_t dir);
 void arith_wrapper(ProgramState *curr, uint16_t regd, uint16_t regs,
-                   arith_code arith);
-void arith_mul(ProgramState *curr, uint16_t regd);
-void arith_div(ProgramState *curr, uint16_t regd);
+                   arith_code arith, int8_t dir);
+void arith_mul(ProgramState *curr, uint16_t regd, int8_t dir);
+void arith_div(ProgramState *curr, uint16_t regd, int8_t dir);
 void arith_xori(ProgramState *curr, uint16_t regd, uint16_t immidiate);
 
 void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t regs);

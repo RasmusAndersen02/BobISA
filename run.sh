@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-cd assembler
 make
-./assembler testbob.bob testbob.out
+cd assembler
+./assembler 1r.bob 1r.out
 
 # mv testbob.out ../emulator/
 cd ../emulator
-make
 
-./emulator ../assembler/testbob.out
+gdb --args ./emulator ../assembler/1r.out

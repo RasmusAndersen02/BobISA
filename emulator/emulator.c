@@ -9,36 +9,38 @@
 #include "emulator.h"
 
 ProgramState *new_state(ProgramState *prev_state, instruction input) {
-  op_code opcode = mask_and_shift(OP, input);
-  uint16_t regd = mask_and_shift(REGd, input);
-  uint16_t regs = mask_and_shift(REGs, input);
-  arith_code arith = mask_and_shift(ARITH, input);
-  uint16_t offimm = mask_and_shift(OFFIMM, input);
   ProgramState *curr_state = malloc(sizeof(ProgramState));
 
   curr_state->program_counter = prev_state->program_counter;
   curr_state->br_register = prev_state->br_register;
   curr_state->direction_bit = prev_state->direction_bit;
   curr_state->memory = malloc(sizeof(uint16_t) * (1 << 16));
-  // stupid ineffecient
+
   memcpy(curr_state->memory, prev_state->memory, sizeof(uint16_t) * (1 << 16));
 
   curr_state->standard_registers = malloc(sizeof(uint16_t) * 16);
   memcpy(curr_state->standard_registers, prev_state->standard_registers,
          sizeof(uint16_t) * 16);
 
+  op_code opcode = mask_and_shift(OP, input);
+  uint16_t regd = mask_and_shift(REGd, input);
+  uint16_t regs = mask_and_shift(REGs, input);
+  arith_code arith = mask_and_shift(ARITH, input);
+  uint16_t offimm = mask_and_shift(OFFIMM, input);
+  // stupid ineffecient
+
   switch (opcode) {
   case ARITH_OP:
-    arith_wrapper(curr_state, regd, regs, arith);
+    arith_wrapper(curr_state, regd, regs, arith, curr_state->direction_bit);
     break;
   case ARITH_XORI:
     arith_xori(curr_state, regd, offimm);
     break;
   case ARITH_MUL2:
-    arith_mul(curr_state, regd);
+    arith_mul(curr_state, regd, curr_state->direction_bit);
     break;
   case ARITH_DIV2:
-    arith_div(curr_state, regd);
+    arith_div(curr_state, regd, curr_state->direction_bit);
     break;
   case MEM_EXCH:
     mem_exchange(curr_state, regd, regs);
@@ -66,14 +68,15 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
     break;
   }
   if (curr_state->br_register != 0) {
-    curr_state->program_counter += curr_state->br_register;
-    if (opcode == RSWB | opcode == SWB) {
+    curr_state->program_counter +=
+        curr_state->direction_bit * curr_state->br_register;
+    if (opcode == RSWB || opcode == SWB) {
       branch_swb(curr_state, regd);
     } else {
       curr_state->br_register -= offimm;
     }
   } else {
-    curr_state->program_counter++;
+    curr_state->program_counter += curr_state->direction_bit;
   }
 
   return curr_state;
@@ -81,10 +84,10 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
 ProgramState *init_state() {
   ProgramState *init = malloc(sizeof(ProgramState));
   init->memory = malloc(sizeof(uint16_t) * (1 << 16));
-  init->program_counter = 0;
+  init->program_counter = 1;
   init->br_register = 0;
   init->standard_registers = calloc(16, sizeof(uint16_t));
-  init->direction_bit = false;
+  init->direction_bit = 1;
   return init;
 }
 void print_states(ProgramState **state_array, size_t state_count) {
@@ -94,7 +97,7 @@ void print_states(ProgramState **state_array, size_t state_count) {
     fprintf(stdout, "____State %zu \n", i);
     fprintf(stdout, "Program Counter: %u \n", state->program_counter);
     fprintf(stdout, "Branch Register: %u \n", state->br_register);
-    fprintf(stdout, "Direction Bit: %u \n", state->direction_bit);
+    fprintf(stdout, "Direction Bit: %d \n", state->direction_bit);
     for (size_t j = 0; j < 16; j++) {
       fprintf(stdout, "r%zu: %d | ", j, state->standard_registers[j]);
     }
@@ -106,11 +109,14 @@ ProgramState **runner(uint16_t *file_buf, uint16_t words_in_file,
                       uint16_t *total_states) {
   ProgramState **state_array = malloc(sizeof(ProgramState *) * 100);
   state_array[*total_states] = init_state();
-  ProgramState *curr_state = state_array[0];
-  while (curr_state->program_counter < words_in_file) {
+  ProgramState *curr_state = state_array[*total_states];
+  while (curr_state->program_counter <= words_in_file) {
     state_array[*total_states + 1] = new_state(
-        state_array[*total_states], file_buf[curr_state->program_counter]);
+        state_array[*total_states], file_buf[curr_state->program_counter - 1]);
     curr_state = state_array[++*total_states];
+    if (curr_state->direction_bit == -1 && curr_state->program_counter == 0) {
+      break;
+    }
   }
   return state_array;
 }
