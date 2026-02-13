@@ -95,7 +95,7 @@ uint16_t mem_exchange(opcode op, uint16_t regd, uint16_t rega) {
 uint16_t branch_regoff(opcode op, uint16_t regd, uint16_t offset) {
   uint16_t encoding = 0x00;
   encoding |= regd << 8;
-  encoding |= offset;
+  encoding |= (offset & 0xFF);
   switch (op) {
   case OP_BGEZ:
     encoding |= 0x03 << 12;

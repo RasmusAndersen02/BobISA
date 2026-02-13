@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #define MEM_SIZE = 65526;
+#define SIGN_EXTEND(x) ((int16_t)((int8_t)((x) & 0xFF)))
 
 typedef uint16_t word;
 typedef uint16_t instruction;
@@ -9,7 +10,7 @@ typedef uint16_t instruction;
 typedef struct ProgramState {
   int16_t *memory;
   int16_t *standard_registers;
-  uint16_t br_register;
+  int16_t br_register;
   uint16_t program_counter;
   int8_t direction_bit;
 } ProgramState;
@@ -57,7 +58,7 @@ void arith_xori(ProgramState *curr, uint16_t regd, uint16_t immidiate);
 void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t regs);
 
 void branch_bgez(ProgramState *curr, uint16_t regd, uint16_t offset);
-void branch_blz(ProgramState *curr, uint16_t regd, uint16_t offset);
+void branch_blz(ProgramState *curr, uint16_t regd, int16_t offset);
 void branch_bevn(ProgramState *curr, uint16_t regd, uint16_t offset);
 void branch_bodd(ProgramState *curr, uint16_t regd, uint16_t offset);
 void branch_bra(ProgramState *curr, uint16_t offset);

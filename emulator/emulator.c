@@ -73,7 +73,7 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
     if (opcode == RSWB || opcode == SWB) {
       branch_swb(curr_state, regd);
     } else {
-      curr_state->br_register -= offimm;
+      curr_state->br_register -= SIGN_EXTEND(offimm);
     }
   } else {
     curr_state->program_counter += curr_state->direction_bit;
@@ -94,9 +94,9 @@ void print_states(ProgramState **state_array, size_t state_count) {
   for (size_t i = 0; i <= state_count; i++) {
     ProgramState *state = state_array[i];
 
-    fprintf(stdout, "____State %zu \n", i);
-    fprintf(stdout, "Program Counter: %u \n", state->program_counter);
-    fprintf(stdout, "Branch Register: %u \n", state->br_register);
+    fprintf(stdout, "____State %zu - ", i);
+    fprintf(stdout, "Program Counter: %u - ", state->program_counter);
+    fprintf(stdout, "Branch Register: %u - ", state->br_register);
     fprintf(stdout, "Direction Bit: %d \n", state->direction_bit);
     for (size_t j = 0; j < 16; j++) {
       fprintf(stdout, "r%zu: %d | ", j, state->standard_registers[j]);

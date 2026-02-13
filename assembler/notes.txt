@@ -1,0 +1,9 @@
+
+reg1 = 1
+reg1 = 1, PC = 7
+reg1 = -1, PC = 8
+reg1 = -1, PC = 3
+reg1 = -1, reg2 = -1, PC = 4
+reg1 = -2, reg2 = -1, PC = 5
+reg1 = -3, reg2 = -1, PC = 6
+

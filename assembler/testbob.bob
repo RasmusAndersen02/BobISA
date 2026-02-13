@@ -1,6 +1,0 @@
-_start_
-ADD1 reg1
-BGEZ reg1, target
-SUB1 reg1
-_target_
-XOR reg2, reg1
