@@ -70,11 +70,6 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
   if (curr_state->br_register != 0) {
     curr_state->program_counter +=
         curr_state->direction_bit * curr_state->br_register;
-    if (opcode == RSWB || opcode == SWB) {
-      branch_swb(curr_state, regd);
-    } else {
-      curr_state->br_register -= SIGN_EXTEND(offimm);
-    }
   } else {
     curr_state->program_counter += curr_state->direction_bit;
   }

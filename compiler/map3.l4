@@ -1,0 +1,43 @@
+function map size:u64
+
+Begin |> 0:0 a:a64
+0:0 0:u64 a:a64 |> Map
+
+Loop Map |> c:b i:u64 a1:a64
+c:b |> = 0:u64 i:u64 |> 0:b
+0:b |> < i:u64 size:u64 |> c1:b
+c1:b i:u64 a1:a64 |> Final Apply
+
+Final |> 0:0 i1:u64 a2:a64
+i1:u64 |> - size:u64 |> 0:u64
+0:0 a2:a64 |> End
+
+Apply |> 0:0 i2:u64 a3:a64
+a3:a64 0:u64 |> swap i2:u64 |> a4:a64 v:u64
+|> % v:u64 3:u64 |> c2:u64
+c2:u64 v:u64 |> M0 M1 M2
+
+M0 |> 0:0 v1:u64
+v1:u64 |> call ff 3:u64 |> w:u64
+0:0 w:u64 |> M01
+
+M1 |> 0:0 v2:u64
+v2:u64 |> call ff 4:u64 |> w1:u64
+0:0 w1:u64 |> M11
+
+M2 |> 0:0 v3:u64
+v3:u64 |> call ff 7:u64 |> w2:u64
+0:0 w2:u64 |> M21
+
+M01 M11 M21 |> c3:u64 w3:u64
+c3:u64  |> %1 w3:u64 3:u64 |>
+a4:a64 w3:u64  |> swap i2:u64 |> a5:a64 0:u64
+i2:u64 |> + 1:u64 |> i3:u64
+0:0 i3:u64 a5:a64 |> Loop
+
+
+function ff x:u64
+
+Begin |> 0:0 v:u64
+v:u64 |> * x:u64 |> w:u64
+0:0 w:u64 |> End

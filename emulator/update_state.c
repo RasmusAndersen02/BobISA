@@ -92,7 +92,6 @@ void arith_div(ProgramState *curr, uint16_t regd, int8_t dir) {
     curr->standard_registers[regd] = (int16_t)temp;
   }
 }
-// kan kun tage to regs, tror man bliver nødt til double XOR
 void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t rega) {
   curr->standard_registers[regd] ^= curr->standard_registers[rega];
   curr->standard_registers[rega] ^= curr->standard_registers[regd];

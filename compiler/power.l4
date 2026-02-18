@@ -1,0 +1,18 @@
+function power x:u64 p:u64
+
+Begin |> 0:0
+0:u64 |> + p:u64 |> p0:u64
+0:0 p0:u64 1:u64 |> Power
+
+Power Recur |> c:b p1:u64 y:u64
+c:b |> < y:u64 2:u64 |> 1:b
+0:b |> = 0:u64 p1:u64 |> c1:b
+c1:b p1:u64 y:u64 |> Loop Exit
+
+Exit |> 0:0 0:u64 xp:u64
+0:0 xp:u64 |> End
+
+Loop |> 0:0 p2:u64 y1:u64
+p2:u64 |> - 1:u64 |> p3:u64
+y1:u64 |> * x:u64 |> y2:u64
+0:0 p3:u64 y2:u64 |> Recur
