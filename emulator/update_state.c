@@ -99,26 +99,26 @@ void mem_exchange(ProgramState *curr, uint16_t regd, uint16_t rega) {
 }
 void branch_bgez(ProgramState *curr, uint16_t regd, uint16_t offset) {
   if (curr->standard_registers[regd] >= 0) {
-    curr->br_register += SIGN_EXTEND(offset);
+    curr->br_register += offset;
   }
 }
 void branch_blz(ProgramState *curr, uint16_t regd, int16_t offset) {
   if (curr->standard_registers[regd] < 0) {
-    curr->br_register += SIGN_EXTEND(offset);
+    curr->br_register += offset;
   }
 }
 void branch_bevn(ProgramState *curr, uint16_t regd, uint16_t offset) {
   if (curr->standard_registers[regd] % 2 == 0) {
-    curr->br_register += SIGN_EXTEND(offset);
+    curr->br_register += offset;
   }
 }
 void branch_bodd(ProgramState *curr, uint16_t regd, uint16_t offset) {
   if (abs(curr->standard_registers[regd] % 2) == 1) {
-    curr->br_register += SIGN_EXTEND(offset);
+    curr->br_register += offset;
   }
 }
 void branch_bra(ProgramState *curr, uint16_t offset) {
-  curr->br_register += SIGN_EXTEND(offset);
+  curr->br_register += offset;
 }
 void branch_rswb(ProgramState *curr, uint16_t regd) {
   curr->standard_registers[regd] ^= curr->br_register;

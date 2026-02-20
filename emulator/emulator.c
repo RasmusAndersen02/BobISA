@@ -26,7 +26,7 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
   uint16_t regd = mask_and_shift(REGd, input);
   uint16_t regs = mask_and_shift(REGs, input);
   arith_code arith = mask_and_shift(ARITH, input);
-  uint16_t offimm = mask_and_shift(OFFIMM, input);
+  int16_t offimm = mask_and_shift(OFFIMM, input);
   // stupid ineffecient
 
   switch (opcode) {
