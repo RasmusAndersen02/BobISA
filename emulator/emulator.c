@@ -27,7 +27,6 @@ ProgramState *new_state(ProgramState *prev_state, instruction input) {
   uint16_t regs = mask_and_shift(REGs, input);
   arith_code arith = mask_and_shift(ARITH, input);
   int16_t offimm = mask_and_shift(OFFIMM, input);
-  // stupid ineffecient
 
   switch (opcode) {
   case ARITH_OP:

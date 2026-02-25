@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #define MEM_SIZE = 65526;
 // required for backward branch jumps otherwise, funny casting errors
-#define SIGN_EXTEND(x) ((int16_t)((int8_t)((x) & 0xFF)))
 
 typedef uint16_t word;
 typedef uint16_t instruction;

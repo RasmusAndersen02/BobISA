@@ -74,12 +74,12 @@ void arith_xori(ProgramState *curr, uint16_t regd, uint16_t immediate) {
 // Kan bruge BGEZ / BLZ for bounds checking af regd.
 void arith_mul(ProgramState *curr, uint16_t regd, int8_t dir) {
   // Shoutout ChatiGippity
-  uint16_t temp = (uint16_t)curr->standard_registers[regd];
   if (dir == -1) {
     arith_div(curr, regd, -dir);
   } else {
-    temp <<= 1;
-    curr->standard_registers[regd] = (int16_t)temp;
+    uint16_t temp = (uint16_t)curr->standard_registers[regd];
+    uint16_t res = (temp << 1) | (temp >> 15);
+    curr->standard_registers[regd] = (int16_t)res;
   }
 }
 void arith_div(ProgramState *curr, uint16_t regd, int8_t dir) {
@@ -87,8 +87,7 @@ void arith_div(ProgramState *curr, uint16_t regd, int8_t dir) {
     arith_mul(curr, regd, -dir);
   } else {
     uint16_t temp = (uint16_t)curr->standard_registers[regd];
-    uint16_t odd_mask = temp & 1;
-    temp = (temp >> 1) | (odd_mask << 15);
+    uint16_t res = (temp >> 1) | (temp << 15);
     curr->standard_registers[regd] = (int16_t)temp;
   }
 }
