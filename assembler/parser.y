@@ -21,37 +21,35 @@ void yyerror(const char *s);
 }
 
 %token <bit16> EXCHANGE BRANCH_REGOFF BRANCH_OFF BRANCH_REG 
-%token <bit16> ARITH_BIN ARITH_UNI ARITH_NA ARITH_XORI
+%token <bit16> ARITH_BIN ARITH_UNI ARITH_MULDIV ARITH_XORI
 %token <bit16> REGISTER IMMEDIATE
-%token <label> IDENTIFIER
+%token <label> REFERENCE
 %token <label> LABEL
 %token COMMA EOL
 
-// %type <bit16> instruction
-// %type *<bit16> program
-// AT&T type thing
 %%
-program:
-
-  |program line
+Program:
+  |Program Line
   ;
-line:
-  LABEL {
+Line:
+  LABEL EOL{
     if (pass ==1){
     add_sym($1, LC);
     }
   }
-  | instruction EOL
+  | Instruction EOL
   | EOL
+  | error EOL{
+    fprintf(stderr, "Syntax Error [l %d]: Expression is undefined \n", LC);
+  }
   ;
 
-instruction: 
+Instruction: 
   ARITH_UNI REGISTER {
     if (pass == 2){
       uint16_t bin = arith_uni($1, $2);
       write_to_bin(bin, output_file);
-    }
-    LC++;
+    } LC++;
   }
   |ARITH_BIN REGISTER COMMA REGISTER {
     if (pass == 2){
@@ -60,7 +58,7 @@ instruction:
     }
     LC++;
   }  
-  |ARITH_NA REGISTER {
+  |ARITH_MULDIV REGISTER {
     if (pass == 2){
       uint16_t bin = arith_na($1, $2);
       write_to_bin(bin, output_file);
@@ -69,24 +67,33 @@ instruction:
   }  
   |ARITH_XORI REGISTER COMMA IMMEDIATE {
     if (pass == 2){
+      if(!in_range($4)){ 
+        fprintf(stderr, "Semantic Error [l %d]: Immediate out of Range \n", LC);
+      }
       uint16_t bin = arith_xori($1, $2, $4);
       write_to_bin(bin, output_file);
     }
     LC++;
   }
 
-  |BRANCH_REGOFF REGISTER COMMA IDENTIFIER {
+  |BRANCH_REGOFF REGISTER COMMA REFERENCE {
     if (pass == 2){
       int offset = lookup_sym($4) - LC;
+      if(!in_range(offset)){ 
+        fprintf(stderr, "Semantic Error [l %d]: Offset out of Range \n", LC);
+      }
       uint16_t bin = branch_regoff($1, $2, offset);
       write_to_bin(bin, output_file);
     }
     LC++;
   } 
 
-  |BRANCH_OFF IDENTIFIER {
+  |BRANCH_OFF REFERENCE {
     if (pass == 2){
       int offset = lookup_sym($2) - LC;
+      if(!in_range(offset)){ 
+        fprintf(stderr, "Semantic Error [l %d]: Offset out of Range \n", LC);
+      }
       uint16_t bin = branch_off($1, offset);
       write_to_bin(bin, output_file);
     }

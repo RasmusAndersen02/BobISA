@@ -141,3 +141,10 @@ bool write_to_bin(uint16_t bin, FILE *file) {
   }
   return true;
 }
+bool in_range(int16_t offimm) {
+  if (offimm < -127 || offimm > 128) {
+    return false;
+  } else {
+    return true;
+  }
+}

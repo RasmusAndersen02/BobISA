@@ -1,4 +1,3 @@
-
 #ifndef ENCODING_H
 #define ENCODING_H
 #include <stdbool.h>
@@ -10,6 +9,7 @@ typedef struct sym {
   uint16_t address;
   struct sym *next;
 } sym;
+extern sym *lookup_list;
 
 typedef enum {
   OP_ADD,
@@ -45,7 +45,6 @@ void add_sym(char *name, uint16_t address);
 uint16_t lookup_sym(char *name);
 
 bool write_to_bin(uint16_t bin, FILE *file);
-
-extern sym *lookup_list;
+bool in_range(int16_t offimm);
 
 #endif

@@ -8,25 +8,25 @@ struct
   exception Sub
 
   val primTable = (* types for primitive functions *)
-    [("=",(["b"],["u64","u64"],["b"])),
-     ("<",(["b"],["u64","u64"],["b"])),
-     ("+",(["u64"],["u64"],["u64"])),
-     ("-",(["u64"],["u64"],["u64"])),
-     ("*",(["u64"],["u64"],["u64"])),
-     ("/",(["u64"],["u64"],["u64"])),
-     ("%",([],["u64","u64"],["u64"])),
-     ("%1",(["u64"],["u64","u64"],[])),
+    [("=",(["b"],["u16","u16"],["b"])),
+     ("<",(["b"],["u16","u16"],["b"])),
+     ("+",(["u16"],["u16"],["u16"])),
+     ("-",(["u16"],["u16"],["u16"])),
+     ("*",(["u16"],["u16"],["u16"])),
+     ("/",(["u16"],["u16"],["u16"])),
+     ("%",([],["u16","u16"],["u16"])),
+     ("%1",(["u16"],["u16","u16"],[])),
      ("not",(["b"],[],["b"])),
-     ("odd",(["b"],["u64"],["b"])),
-     ("rol1",(["u64"],[],["u64"])),
-     ("ror1",(["u64"],[],["u64"])),
-     ("rol",(["u64"],["u64"],["u64"])),
-     ("ror",(["u64"],["u64"],["u64"])),
-     ("swap",(["a64","u64"],["u64"],["a64","u64"])),
+     ("odd",(["b"],["u16"],["b"])),
+     ("rol1",(["u16"],[],["u16"])),
+     ("ror1",(["u16"],[],["u16"])),
+     ("rol",(["u16"],["u16"],["u16"])),
+     ("ror",(["u16"],["u16"],["u16"])),
+     ("swap",(["a16","u16"],["u16"],["a16","u16"])),
      (* for test messages *)
-     ("test",([],["u64"],[])),
-     ("test2",([],["u64","u64"],[])),
-     ("test3",([],["u64","u64","u64"],[]))
+     ("test",([],["u16"],[])),
+     ("test2",([],["u16","u16"],[])),
+     ("test3",([],["u16","u16","u16"],[]))
     ]
 
   (* inverse functions *)
@@ -43,9 +43,9 @@ struct
     | invertPrim p = p  (* default is self-inverse *)
 
 
-  val u64M = "18446744073709551616" (* 2⁶⁴ *)
-  val u64m = "18446744073709551615" (* 2⁶⁴-1 *)
-  val u63M = "9223372036854775808" (* 2⁶³ *)
+  val u16M = "65536" (* 2¹⁶ *)
+  val u16m = "65535" (* 2¹⁶-1 *)
+  val u15M = "32768" (* 2¹⁵ *)
 
   (* helper functions on strings *)
   fun negate "0" = "1"
@@ -137,11 +137,11 @@ struct
     then compare x ("0" ^ y)
     else String.compare (x, y)
 
-  (* if number >= 2⁶⁴, then subtract 2⁶⁴ *)
+  (* if number >= 2¹⁶, then subtract 2¹⁶ *)
   fun rollOver x =
-    case compare x u64M of
+    case compare x u16M of
       LESS => x
-    | _    => subtract x u64M
+    | _    => subtract x u16M
 
   fun odd x = 
         let
@@ -175,22 +175,22 @@ struct
   fun times16 x = times4 (times4 x)
   fun times64 x = times16 (times16 x)
 
-  fun mod64 x = subtract x (times64 (div64 x))
+  fun mod16 x = subtract x (times16 (div16 x))
 
   fun rol1 x =
     let
       val x2 = add x x
     in
-      case compare x2 u64M of
+      case compare x2 u16M of
         LESS => x2
-      | _ => subtract x2 u64m
+      | _ => subtract x2 u16m
     end
 
   fun rol x 0 = x
     | rol x n = rol (rol1 x) (n - 1)
 
   fun ror1 x =
-    if odd x then add (div2 x) u63M
+    if odd x then add (div2 x) u15M
     else div2 x
     
   fun ror x 0 = x
@@ -235,7 +235,7 @@ struct
     | ("+", [x], [y]) => [rollOver (add x y)]
     | ("-", [x], [y]) =>
         ((case compare x y of
-            LESS   => [subtract (add x u64M) y]
+            LESS   => [subtract (add x u16M) y]
 	  | EQUAL   => ["0"]
 	  | GREATER => [subtract x y])
 	 handle Sub => raise Error ("negative result", pos))
@@ -252,13 +252,13 @@ struct
     | ("ror1", [x], []) => [ror1 x]
     | ("rol", [x], [r]) =>
         let
-	  val r1 = mod64 r
+	  val r1 = mod16 r
 	in
 	  [rol x (Option.getOpt (Int.fromString r1, 0))]
 	end
     | ("ror", [x], [r]) =>
         let
-	  val r1 = mod64 r
+	  val r1 = mod16 r
 	in
 	  [ror x (Option.getOpt (Int.fromString r1, 0))]
 	end

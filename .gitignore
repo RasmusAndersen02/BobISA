@@ -5,5 +5,7 @@ assembler/lex.yy.c
 
 *.o
 *.out
+*.ui
+*.uo
 emulator/emulator
 emulator/note.txt

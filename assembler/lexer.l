@@ -3,8 +3,9 @@
 #include "parser.tab.h"
 %}
 
+%option yylineno
+%option noyywrap
 %%
-
 "ADD" {yylval.bit16 = OP_ADD; return ARITH_BIN;}
 "SUB" {yylval.bit16 = OP_SUB; return ARITH_BIN;}
 "ADD1" {yylval.bit16 = OP_ADD1; return ARITH_UNI;}
@@ -13,8 +14,8 @@
 "XOR" {yylval.bit16 = OP_XOR; return ARITH_BIN;}
 
 "XORI" {yylval.bit16 = OP_XORI; return ARITH_XORI;}
-"MUL2" {yylval.bit16 = OP_MUL2; return ARITH_NA;}
-"DIV2" {yylval.bit16 = OP_DIV2; return ARITH_NA;}
+"MUL2" {yylval.bit16 = OP_MUL2; return ARITH_MULDIV;}
+"DIV2" {yylval.bit16 = OP_DIV2; return ARITH_MULDIV;}
 
 "BGEZ" {yylval.bit16 = OP_BGEZ; return BRANCH_REGOFF;}
 "BLZ" {yylval.bit16 = OP_BLZ; return BRANCH_REGOFF;}
@@ -30,16 +31,16 @@
 
 -?[0-9]+ {yylval.bit16 = atoi(yytext); return IMMEDIATE; }
 _[a-zA-Z][a-zA-Z0-9]*_ { yylval.label = yytext; return LABEL;}
-[a-zA-Z][a-zA-Z0-9]* { yylval.label = yytext; return IDENTIFIER;}
+[a-zA-Z][a-zA-Z0-9]* { yylval.label = yytext; return REFERENCE;}
 
-[ \t]+
 "," {return COMMA;}
 "\n" {return EOL;}
+
+[ \t\r]+ {}
+
+. {fprintf(stderr, "Lexical Error [l %d]: Character (%s) is undefined \n", yylineno, yytext);}
 
 
 
 
 %%
-int yywrap(){
-    return 1;
-}

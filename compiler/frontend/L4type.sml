@@ -229,7 +229,7 @@ struct
 	end
 
   val funTable = (* should be generated from program *)
-    [("fib2",(["u64"],[],["u64","u64"]))]
+    [("fib2",(["u16"],[],["u16","u16"]))]
     
   fun check fs =
     let val fTable = makeFunTable fs in

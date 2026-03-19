@@ -42,7 +42,7 @@ struct
     in
       List.app checkInstr instrs
     end
-    
+
 
   fun checkFunction (name, args, blocks : L4.block list, pos) =
       let
@@ -73,5 +73,5 @@ struct
   fun check (fs : L4.program) =
     (checkDuplicates (List.map (#1) fs) "function name" (0,0);
      List.app checkFunction fs)
-    
+
 end

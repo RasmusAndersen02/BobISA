@@ -44,7 +44,7 @@ struct
     | e2b l = l
 
   fun invertEntry (labels, args, pos) = (args, List.map b2e labels, pos)
-  
+
   fun invertExit (args, labels, pos) = (List.map e2b labels, args, pos)
 
   fun invertBlock (entry, instrs, exit) =
@@ -56,10 +56,10 @@ struct
         (fname, args, List.map invertBlock bs, pos)
 
   (* convert to text *)
-  
+
   fun showDecl (ConstD (v, t)) = v ^ ":" ^ t
     | showDecl (VarD (x, t)) = x ^ ":" ^ t
-  
+
   fun showArgs args =
     String.concatWith " " (List.map showDecl args)
 
