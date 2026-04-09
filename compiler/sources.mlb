@@ -6,6 +6,6 @@ frontend/L4.sml
 frontend/L4check.sml
 frontend/L4type.sml
 frontend/L4int.sml
-frontend/l4i.sml
-backend/L4prim2bob_t.sml
-backend/l4c_t.sml
+frontend/L4i.sml
+backend/L4liveness.sml
+backend/L4liveness_n.sml
