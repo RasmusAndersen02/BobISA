@@ -5,7 +5,7 @@ frontend/L4lexer.sml
 frontend/L4.sml
 frontend/L4check.sml
 frontend/L4type.sml
-frontend/L4int.sml
-frontend/L4i.sml
-backend/L4liveness.sml
-backend/L4liveness_n.sml
+backend/L4cfg.sig
+backend/L4cfg.sml
+backend/L4interference.sig
+backend/L4interference.sml
